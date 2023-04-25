@@ -2,6 +2,8 @@ import wx
 import pygame
 import json
 import win32api
+import numpy as np
+import matplotlib.pyplot as plt
 
 class SettingsDialog(wx.Dialog):
     def __init__(self, parent, config, setting_type):
@@ -41,6 +43,33 @@ class SettingsDialog(wx.Dialog):
         self.EndModal(wx.ID_OK)
 
 
+class SensitivityPlotDialog():
+    def __init__(self, parent, config):
+        self.config = config
+        self.figure = Figure()
+        self.canvas = FigureCanvas(self, -1, self.figure)
+
+        self.canvas.mpl_connect("button_click_event", onclick)
+
+    def OnPlot(self):
+        x = np.linspace(-1, 1, 2)
+        y = self.config["multiplier"] * x
+        
+        # dead zone setting
+        # y[np.abs(x) < self.config["deadzone"]] = 0
+
+        ax.plot(x, y)
+        ax.xlabel("Input")
+        ax.ylabel("Output")
+        ax.title("Sensitivity Plot")
+        ax.grid()
+        ax.show()
+
+    def onclick(self, event):
+        print(event)
+
+
+
 class MainFrame(wx.Frame):
     def __init__(self):
         super().__init__(None, title="Joystick Mouse Control", size=(400, 300))
@@ -71,14 +100,20 @@ class MainFrame(wx.Frame):
         hbox3.Add(deadzone_settings_button)
 
         hbox4 = wx.BoxSizer(wx.HORIZONTAL)
+        sensitivity_plot_button = wx.Button(panel, label="Sensitivity Plot")
+        sensitivity_plot_button.Bind(wx.EVT_BUTTON, self.OnSensitivityPlot)
+        hbox4.Add(sensitivity_plot_button)
+
+        hbox5 = wx.BoxSizer(wx.HORIZONTAL)
         start_button = wx.Button(panel, label="Start")
         start_button.Bind(wx.EVT_BUTTON, self.OnStart)
-        hbox4.Add(start_button)
+        hbox5.Add(start_button)
 
         vbox.Add(hbox1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
         vbox.Add(hbox2, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
         vbox.Add(hbox3, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
         vbox.Add(hbox4, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
+        vbox.Add(hbox5, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
 
         panel.SetSizer(vbox)
 
@@ -92,6 +127,9 @@ class MainFrame(wx.Frame):
                 "multiplier": 0.7,
                 "deadzone": 0.1
             }
+
+    def OnSensitivityPlot(self, event):
+        SensitivityPlotDialog(self, self.config)
 
     def OnKeySettings(self, event):
         with SettingsDialog(self, self.config, "Key") as dlg:
