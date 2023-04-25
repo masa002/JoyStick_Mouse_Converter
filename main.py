@@ -5,7 +5,7 @@ import win32api
 
 class SettingsDialog(wx.Dialog):
     def __init__(self, parent, config, setting_type):
-        self.setting_type = setting_type
+        self.setting_type = setting_type.lower()
         title = f"{setting_type} Settings"
         super().__init__(parent, title=title, size=(300, 200))
         self.config = config
@@ -94,19 +94,19 @@ class MainFrame(wx.Frame):
             }
 
     def OnKeySettings(self, event):
-        with SettingsDialog(self, self.config, "key") as dlg:
+        with SettingsDialog(self, self.config, "Key") as dlg:
             if dlg.ShowModal() == wx.ID_OK:
                 self.config.update(dlg.config)
                 self.OnSave()
 
     def OnMultiplierSettings(self, event):
-        with SettingsDialog(self, self.config, "multiplier") as dlg:
+        with SettingsDialog(self, self.config, "Multiplier") as dlg:
             if dlg.ShowModal() == wx.ID_OK:
                 self.config.update(dlg.config)
                 self.OnSave()
 
     def OnDeadzoneSettings(self, event):
-        with SettingsDialog(self, self.config, "deadzone") as dlg:
+        with SettingsDialog(self, self.config, "Deadzone") as dlg:
             if dlg.ShowModal() == wx.ID_OK:
                 self.config.update(dlg.config)
                 self.OnSave()
