@@ -3,9 +3,11 @@ import pygame
 import json
 import win32api
 
-class KeySettingsDialog(wx.Dialog):
-    def __init__(self, parent, config):
-        super().__init__(parent, title="Key Settings", size=(300, 200))
+class SettingsDialog(wx.Dialog):
+    def __init__(self, parent, config, setting_type):
+        self.setting_type = setting_type
+        title = f"{setting_type} Settings"
+        super().__init__(parent, title=title, size=(300, 200))
         self.config = config
 
         self.InitUI()
@@ -14,11 +16,14 @@ class KeySettingsDialog(wx.Dialog):
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
+        # 入力欄の作成
         hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        self.key_input = wx.TextCtrl(panel, value=self.config["key"])
-        hbox1.Add(wx.StaticText(panel, label="Activation Key:"), flag=wx.RIGHT, border=8)
-        hbox1.Add(self.key_input)
+        value = self.config[self.setting_type]
+        self.input = wx.TextCtrl(panel, value=str(value))
+        hbox1.Add(wx.StaticText(panel, label=f"{self.setting_type}:"), flag=wx.RIGHT, border=8)
+        hbox1.Add(self.input)
 
+        # 保存ボタンの作成
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
         save_button = wx.Button(panel, label="Save")
         save_button.Bind(wx.EVT_BUTTON, self.OnSave)
@@ -29,69 +34,10 @@ class KeySettingsDialog(wx.Dialog):
 
         panel.SetSizer(vbox)
 
+    # 保存ボタンが押されたときの処理
     def OnSave(self, event):
-        self.config["key"] = self.key_input.GetValue()
-        self.EndModal(wx.ID_OK)
-
-
-class MultiplierSettingsDialog(wx.Dialog):
-    def __init__(self, parent, config):
-        super().__init__(parent, title="Multiplier Settings", size=(300, 200))
-        self.config = config
-
-        self.InitUI()
-
-    def InitUI(self):
-        panel = wx.Panel(self)
-        vbox = wx.BoxSizer(wx.VERTICAL)
-
-        hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        self.multiplier_input = wx.TextCtrl(panel, value=str(self.config["multiplier"]))
-        hbox1.Add(wx.StaticText(panel, label="Multiplier:"), flag=wx.RIGHT, border=8)
-        hbox1.Add(self.multiplier_input)
-
-        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-        save_button = wx.Button(panel, label="Save")
-        save_button.Bind(wx.EVT_BUTTON, self.OnSave)
-        hbox2.Add(save_button)
-
-        vbox.Add(hbox1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
-        vbox.Add(hbox2, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
-
-        panel.SetSizer(vbox)
-
-    def OnSave(self, event):
-        self.config["multiplier"] = float(self.multiplier_input.GetValue())
-        self.EndModal(wx.ID_OK)
-
-class DeadzoneSettingsDialog(wx.Dialog):
-    def __init__(self, parent, config):
-        super().__init__(parent, title="Deadzone Settings", size=(300, 200))
-        self.config = config
-
-        self.InitUI()
-
-    def InitUI(self):
-        panel = wx.Panel(self)
-        vbox = wx.BoxSizer(wx.VERTICAL)
-
-        hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        self.deadzone_input = wx.TextCtrl(panel, value=str(self.config["deadzone"]))
-        hbox1.Add(wx.StaticText(panel, label="Deadzone:"), flag=wx.RIGHT, border=8)
-        hbox1.Add(self.deadzone_input)
-
-        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-        save_button = wx.Button(panel, label="Save")
-        save_button.Bind(wx.EVT_BUTTON, self.OnSave)
-        hbox2.Add(save_button)
-
-        vbox.Add(hbox1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
-        vbox.Add(hbox2, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
-
-        panel.SetSizer(vbox)
-
-    def OnSave(self, event):
-        self.config["deadzone"] = float(self.deadzone_input.GetValue())
+        value = float(self.input.GetValue()) if self.setting_type != "key" else self.input.GetValue()
+        self.config[self.setting_type] = value
         self.EndModal(wx.ID_OK)
 
 
@@ -148,19 +94,19 @@ class MainFrame(wx.Frame):
             }
 
     def OnKeySettings(self, event):
-        with KeySettingsDialog(self, self.config) as dlg:
+        with SettingsDialog(self, self.config, "key") as dlg:
             if dlg.ShowModal() == wx.ID_OK:
                 self.config.update(dlg.config)
                 self.OnSave()
 
     def OnMultiplierSettings(self, event):
-        with MultiplierSettingsDialog(self, self.config) as dlg:
+        with SettingsDialog(self, self.config, "multiplier") as dlg:
             if dlg.ShowModal() == wx.ID_OK:
                 self.config.update(dlg.config)
                 self.OnSave()
 
     def OnDeadzoneSettings(self, event):
-        with DeadzoneSettingsDialog(self, self.config) as dlg:
+        with SettingsDialog(self, self.config, "deadzone") as dlg:
             if dlg.ShowModal() == wx.ID_OK:
                 self.config.update(dlg.config)
                 self.OnSave()
@@ -177,7 +123,6 @@ class MainFrame(wx.Frame):
         import time
         time.sleep(5)
 
-        # 16進数のキーコードを取得
         key_code = ord(self.config["key"])
         multiplier = self.config["multiplier"]
         deadzone = self.config["deadzone"]
