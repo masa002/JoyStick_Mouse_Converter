@@ -1,4 +1,4 @@
-# JoyStick_Mouse_Converter(Alpfa)
+# JoyStick_Mouse_Converter(Alpha)
  
 コントローラー入力をマウス入力へ変換するアプリケーションです。
 
