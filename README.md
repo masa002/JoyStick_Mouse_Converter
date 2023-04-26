@@ -14,6 +14,6 @@
 ## バグ対処法
 1. アプリを閉じる
 2. config.jsonを削除する
-3. Key Settingsを開く
-4. グラフを設定する or 開く
+3. Key Settingsを開き保存する
+4. Graph Settingを開きグラフを設定する
 5. 動作させる
