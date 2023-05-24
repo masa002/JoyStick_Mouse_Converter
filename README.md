@@ -18,4 +18,4 @@
 4. Graph Settingを開きグラフを設定する
 5. 動作させる
 
-This program was not created to promote cheating in games, and if it continues to be used for such purposes, I will suspend its publication:(
+This program was not created to promote cheating in games, and if it continues to be used for such purposes, I will suspend its publication :(
